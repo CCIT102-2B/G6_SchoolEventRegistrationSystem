@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>School Event Registration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top"><div class="top-in">
+    <div class="brand">SchoolEvents<span>.</span></div>
+    <nav>
+      <button data-view="events">Events</button>
+      <button data-view="register">Register</button>
+      <button data-view="people">Participants</button>
+      <button data-view="add">Add event</button>
+    </nav>
+  </div></header>
+
+  <main>
+    <!-- FUNCTION: View Events (shows the Event Details feature) -->
+    <section class="view" id="view-events">
+      <h2>Upcoming events</h2>
+      <p class="lead">Browse school events and sign up with your student information.</p>
+      <div id="eventList"></div>
+    </section>
+
+    <!-- FUNCTION: Register for Event (Registration Form + Registration Confirmation) -->
+    <section class="view" id="view-register" hidden>
+      <h2>Register for an event</h2>
+      <p class="lead">Choose the event, then fill in the student information.</p>
+      <div class="card">
+        <label>Event <select id="rEvent"></select></label>
+        <div id="eventInfo" class="info"></div>
+      </div>
+      <form id="regForm" class="card stack">
+        <h3>Student information</h3>
+        <div class="grid cols-2">
+          <label>Student ID <input id="rStudentId" required maxlength="20" placeholder="e.g. 2026-0123"></label>
+          <label>Full name <input id="rName" required maxlength="60"></label>
+          <label>Grade / year and section <input id="rGrade" required maxlength="30" placeholder="e.g. Grade 10 - Rizal"></label>
+          <label>Email <input id="rEmail" type="email" required></label>
+        </div>
+        <p><button class="btn">Register</button></p>
+      </form>
+      <div id="confirmation" class="card confirm" hidden></div>
+    </section>
+
+    <!-- FUNCTION: View Participants (Participant List feature) -->
+    <section class="view" id="view-people" hidden>
+      <h2>Participants</h2>
+      <p class="lead">See which students have registered for an event.</p>
+      <div class="card"><label>Event <select id="pEvent"></select></label></div>
+      <div id="peopleBox"></div>
+    </section>
+
+    <!-- FUNCTION: Add Event -->
+    <section class="view" id="view-add" hidden>
+      <h2>Add an event</h2>
+      <p class="lead">Create a new event students can register for.</p>
+      <form id="eventForm" class="card stack">
+        <label>Event title <input id="eTitle" required maxlength="80" placeholder="e.g. Science Fair 2026"></label>
+        <div class="grid cols-2">
+          <label>Date <input id="eDate" type="date" required></label>
+          <label>Time <input id="eTime" type="time" value="08:00" required></label>
+          <label>Venue <input id="eVenue" required maxlength="80" placeholder="e.g. School gymnasium"></label>
+          <label>Maximum participants <input id="eCapacity" type="number" min="1" max="1000" value="50" required></label>
+        </div>
+        <label>Description <textarea id="eDesc" maxlength="500" placeholder="What is this event about? What should students bring?"></textarea></label>
+        <p><button class="btn">Save event</button></p>
+      </form>
+    </section>
+  </main>
+  <footer class="foot">
+    <p>Everything is saved in this browser only. <button class="btn small ghost" id="resetBtn" type="button">Reset to sample data</button></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
