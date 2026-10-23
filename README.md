@@ -1,7 +1,8 @@
 # SchoolEvents (offline version): Event Registration System
 
-Works with NO server and NO Node.js. Just open `index.html` in your browser.
+Works with NO server and NO Node.js. Just open `index.html` in your browser .
 
+this is a trial
 ## Run it
 Double-click `index.html`. That is all.
 
