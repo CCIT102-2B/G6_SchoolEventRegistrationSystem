@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c2a63">
+  <title>CampusPulse | Campus Events &amp; Registration</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top"><div class="top-in">
+    <div class="brand">CampusPulse<span>.</span></div>
+    <nav>
+      <button data-view="events">Events</button>
+      <button data-view="register">Register</button>
+      <button data-view="people">Participants</button>
+      <!-- NEW: only organizers and the Master Admin see these two (data-roles) -->
+      <button data-view="add" data-roles="organizer master" hidden>Add event</button>
+      <button data-view="attendance" data-roles="organizer master" hidden>Attendance</button>
+    </nav>
+    <!-- NEW: shows the Log in button, or who is logged in and a Log out button -->
+    <div id="authBox" class="authbox"></div>
+  </div></header>
+
+  <main>
+    <!-- NEW FUNCTION: Sign up (a new student creates their own account) -->
+    <section class="view" id="view-signup" hidden>
+      <h2>Create your student account</h2>
+      <p class="lead">Fill in every field marked <span class="req">*</span>. Then you can log in and register for events.</p>
+      <form id="signupForm" class="card stack" novalidate>
+        <h3>Personal information</h3>
+        <div class="grid cols-3">
+          <label><span class="lbl">First name <span class="req">*</span></span><input id="sFirst" maxlength="40" autocomplete="given-name"></label>
+          <label><span class="lbl">Middle name <small>(optional)</small></span><input id="sMiddle" maxlength="40" autocomplete="additional-name"></label>
+          <label><span class="lbl">Last name <span class="req">*</span></span><input id="sLast" maxlength="40" autocomplete="family-name"></label>
+        </div>
+        <h3>Student and contact details</h3>
+        <div class="grid cols-3">
+          <label><span class="lbl">Student number <span class="req">*</span></span><input id="sStudentNo" maxlength="20" placeholder="e.g. 2026-1001"></label>
+          <label><span class="lbl">Student email <span class="req">*</span></span><input id="sEmail" type="email" maxlength="80" placeholder="name@school.edu.ph" autocomplete="email"></label>
+          <label><span class="lbl">Contact number <span class="req">*</span></span><input id="sContact" type="tel" maxlength="16" placeholder="09171234567" autocomplete="tel"></label>
+        </div>
+        <h3>Course</h3>
+        <div class="grid cols-3">
+          <label><span class="lbl">Department <span class="req">*</span></span><select id="sDept"></select></label>
+          <label><span class="lbl">Program <span class="req">*</span></span><select id="sProg"></select></label>
+          <label><span class="lbl">Year level <span class="req">*</span></span><select id="sYear"></select></label>
+        </div>
+        <h3>Login details</h3>
+        <div class="grid cols-3">
+          <label><span class="lbl">Username <span class="req">*</span></span><input id="sUser" maxlength="20" autocomplete="username" placeholder="4 to 20 letters or numbers"></label>
+          <label><span class="lbl">Password <span class="req">*</span></span><input id="sPass" type="password" maxlength="64" autocomplete="new-password"></label>
+          <label><span class="lbl">Confirm password <span class="req">*</span></span><input id="sPass2" type="password" maxlength="64" autocomplete="new-password"></label>
+        </div>
+        <p class="hint">Password: at least 8 characters, with at least one letter and one number.
+          <label class="check"><input type="checkbox" id="sShow"> Show passwords</label></p>
+        <label class="check"><input type="checkbox" id="sAgree"> <span>I agree that the school may use these details for event registration and attendance. <span class="req">*</span></span></label>
+        <p><button class="btn go">Create account</button>
+          <button type="button" class="btn ghost" data-goto="login">I already have an account</button></p>
+      </form>
+    </section>
+
+    <!-- NEW FUNCTION: Log in (Student, Department Organizer or Master Admin) -->
+    <section class="view" id="view-login" hidden>
+      <h2>Log in</h2>
+      <p class="lead">Students log in to register. Department organizers and the Master Admin log in to add events and manage attendance.</p>
+      <form id="loginForm" class="card stack">
+        <div class="grid cols-2">
+          <label>Username <input id="lUser" required maxlength="40" autocomplete="username"></label>
+          <label>Password <input id="lPass" type="password" required autocomplete="current-password"></label>
+        </div>
+        <p><button class="btn">Log in</button>
+          <button type="button" class="btn ghost" data-goto="signup">No account yet? Sign up</button></p>
+      </form>
+      <div class="card">
+        <h3>Demo accounts</h3>
+        <p class="muted">The password of every demo account is <code>password123</code>. Click a row to fill in the form.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Username</th><th>Who</th><th>Role</th></tr></thead>
+          <tbody id="demoBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- FUNCTION: View Events (shows the Event Details feature) -->
+    <section class="view" id="view-events" hidden>
+      <h2>Upcoming events</h2>
+      <p class="lead">Browse school events and sign up with your student account.</p>
+      <div id="eventList"></div>
+    </section>
+
+    <!-- FUNCTION: Register for Event (Registration Form + Registration Confirmation) -->
+    <section class="view" id="view-register" hidden>
+      <h2>Register for an event</h2>
+      <p class="lead">Choose the event, then check your student information.</p>
+      <!-- NEW: shown instead of the form when nobody (or a non-student) is logged in -->
+      <div id="regLogin" class="card empty" hidden><p id="regLoginMsg"></p><button class="btn" data-goto="login">Log in</button></div>
+      <div id="regWrap">
+        <div class="card">
+          <label>Event <select id="rEvent"></select></label>
+          <div id="eventInfo" class="event-info"></div>
+        </div>
+        <form id="regForm" class="card stack">
+          <h3>Student information</h3>
+          <p class="muted flush">Filled in from your account. Your student ID cannot be changed.</p>
+          <div class="grid cols-2">
+            <label>Student ID <input id="rStudentId" required maxlength="20" readonly></label>
+            <label>Full name <input id="rName" required maxlength="60"></label>
+            <label>Program and year level <input id="rGrade" required maxlength="30" placeholder="e.g. BSIT - 1st year"></label>
+            <label>Email <input id="rEmail" type="email" required></label>
+            <label>Contact number <input id="rContact" readonly placeholder="Not provided"></label>
+          </div>
+          <p><button class="btn go">Register</button></p>
+        </form>
+        <div id="confirmation" class="card confirm" hidden></div>
+        <div id="myRegs"></div>
+      </div>
+    </section>
+
+    <!-- FUNCTION: View Participants (Participant List feature) -->
+    <section class="view" id="view-people" hidden>
+      <h2>Participants</h2>
+      <p class="lead">See which students have registered for an event.</p>
+      <div class="card"><label>Event <select id="pEvent"></select></label></div>
+      <div id="peopleBox"></div>
+    </section>
+
+    <!-- FUNCTION: Add Event (organizers and Master Admin only) -->
+    <section class="view" id="view-add" hidden>
+      <h2>Add an event</h2>
+      <p class="lead">Create a new event, choose who can join, and choose how the seats are shared.</p>
+      <form id="eventForm" class="card stack">
+        <label>Event title <input id="eTitle" required maxlength="80" placeholder="e.g. Science Fair 2026"></label>
+        <div class="grid cols-2">
+          <label>Date <input id="eDate" type="date" required></label>
+          <label>Time <input id="eTime" type="time" value="08:00" required></label>
+          <label>Venue <input id="eVenue" required maxlength="80" placeholder="e.g. School gymnasium"></label>
+        </div>
+        <label>Description <textarea id="eDesc" maxlength="500" placeholder="What is this event about? What should students bring?"></textarea></label>
+
+        <!-- NEW: who can join -->
+        <h3>Who can join?</h3>
+        <label>Audience <select id="eAudience"></select></label>
+        <div id="eDeptsBox" hidden>
+          <p class="muted tight" id="eDeptsHint"></p>
+          <div id="eDepts" class="checks"></div>
+        </div>
+
+        <!-- NEW: how the seats are shared (the switch) -->
+        <h3>How are the seats shared?</h3>
+        <div class="seg" role="radiogroup" aria-label="Capacity mode">
+          <label><input type="radio" name="cmode" value="open" checked> <span>Open (first come, first served)</span></label>
+          <label><input type="radio" name="cmode" value="quota"> <span>Quota per program and year level</span></label>
+        </div>
+        <div id="openBox">
+          <label>Maximum participants <input id="eCapacity" type="number" min="1" max="1000" value="50" required></label>
+        </div>
+        <div id="quotaBox" hidden>
+          <p class="muted tight">Set how many slots each program and year level gets. Students of other programs or years cannot register.</p>
+          <div class="quota-head"><span>Program</span><span>Year level</span><span>Slots</span><span></span></div>
+          <div id="quotaRows"></div>
+          <p class="quota-foot"><button type="button" class="btn small ghost" id="addQuota">+ Add program / year</button>
+            <span class="muted" id="quotaTotal"></span></p>
+        </div>
+
+        <p><button class="btn go">Save event</button></p>
+      </form>
+    </section>
+
+    <!-- NEW FUNCTION: Event Attendance Manager (organizers and Master Admin only) -->
+    <section class="view" id="view-attendance" hidden>
+      <h2>Event Attendance Manager</h2>
+      <p class="lead" id="attLead"></p>
+      <div id="aStats" class="stats"></div>
+      <div class="card stack">
+        <div class="grid cols-3">
+          <label>Event <select id="aEvent"></select></label>
+          <label>Department <select id="aDept"></select></label>
+          <label>Program <select id="aProg"></select></label>
+          <label>Year level <select id="aYear"></select></label>
+          <label>Status <select id="aStatus">
+            <option value="">All statuses</option><option value="registered">Registered (not yet in)</option><option value="checked_in">Checked in</option></select></label>
+          <label>Search <input id="aSearch" placeholder="Name, student ID, contact or code"></label>
+          <label>Sort by <select id="aSort">
+            <option value="registered">Registration time</option><option value="name">Name</option><option value="studentId">Student ID</option>
+            <option value="event">Event</option><option value="department">Department</option><option value="program">Program</option>
+            <option value="year">Year level</option><option value="status">Status</option></select></label>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn small ghost" id="aDir"></button>
+          <label class="check"><input type="checkbox" id="aAuto" checked> Auto-refresh every 10 seconds</label>
+          <button type="button" class="btn small ghost" id="aRefresh">Refresh now</button>
+          <button type="button" class="btn small" id="aExport">Export CSV</button>
+          <span class="muted" id="aUpdated"></span>
+        </div>
+      </div>
+      <div class="card table-wrap"><table>
+        <thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Contact</th><th>Department</th><th>Program</th><th>Year</th><th>Event</th><th>Status</th><th>Code</th><th></th></tr></thead>
+        <tbody id="aBody"></tbody>
+      </table></div>
+    </section>
+  </main>
+  <script src="config.js"></script>   <!-- NEW: where the API lives -->
+  <script src="app.js"></script>
+</body>
+</html>
